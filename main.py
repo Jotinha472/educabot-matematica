@@ -16,7 +16,7 @@ if not API_KEY:
 client = OpenAI(api_key=API_KEY)
 
 st.set_page_config(
-    page_title="EducaBot • Matemática",
+    page_title="CogNivaIA • Matemática",
     layout="centered",
     initial_sidebar_state="collapsed"
 )
@@ -172,13 +172,56 @@ st.markdown("""
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
+if "nivel" not in st.session_state:
+    st.session_state.nivel = "iniciante"
+
+# ======================
+# FUNÇÃO PEDAGÓGICA
+# ======================
+def format_pedagogico(texto):
+    linhas = texto.split("\n")
+    html = ""
+
+    for linha in linhas:
+        linha = linha.strip()
+
+        if linha.startswith("Passo"):
+            html += f"""
+            <div class="step">
+                <b>{linha}</b>
+            </div>
+            """
+        elif linha.startswith("Exemplo"):
+            html += f"""
+            <div class="concept">
+                <b>{linha}</b>
+            </div>
+            """
+        elif linha.startswith("Dica"):
+            html += f"""
+            <div class="concept">
+                💡 <b>{linha}</b>
+            </div>
+            """
+        elif linha.startswith("Erro comum"):
+            html += f"""
+            <div class="warning">
+                ⚠️ <b>{linha}</b>
+            </div>
+            """
+        else:
+            html += f"<p>{linha}</p>"
+
+    return html
+
+
 # ======================
 # HEADER
 # ======================
 st.markdown("""
 <div class="title-wrapper">
     <span class="title-emoji">🧠</span>
-    <span class="title-text">EducaBot — Matemática</span>
+    <span class="title-text">CogNivaIA — Matemática</span>
 </div>
 <div class="subtitle">
     Aprenda no seu ritmo. Entenda de verdade. Sem medo de errar.
@@ -194,7 +237,7 @@ if not st.session_state.messages:
     st.session_state.messages.append({
         "role": "assistant",
         "content": (
-            "👋 **Oi! Eu sou o EducaBot.**<br><br>"
+            "👋 **Oi! Eu sou o CogNivaIA.**<br><br>"
             "Vou te ajudar a aprender matemática no seu ritmo, sem pressa.<br><br>"
             "<b>Você pode:</b><br>"
             "📘 Mandar um exercício<br>"
@@ -217,7 +260,7 @@ for msg in st.session_state.messages:
         <div class="bot-bubble">
             <div class="bot-header">
                 <div class="avatar"></div>
-                <b>EducaBot</b>
+                <b>CogNivaIA</b>
             </div>
             {msg["content"]}
         </div>
@@ -250,7 +293,7 @@ if send and user_text.strip():
         <div class="dot"></div>
         <div class="dot"></div>
         <div class="dot"></div>
-        <span>EducaBot está digitando…</span>
+        <span>CogNivaIA está digitando…</span>
     </div>
     """, unsafe_allow_html=True)
 
@@ -263,12 +306,26 @@ if send and user_text.strip():
         messages=[
             {
                 "role": "system",
-                "content": (
-                    "Você é o EducaBot, um professor de matemática paciente e didático. "
-                    "Explique sempre em passos numerados e claros. "
-                    "Use exemplos simples e perguntas de verificação. "
-                    "Considere que o ano atual é 2026 e nunca mencione datas antigas."
-                )
+                "content": f""" 
+                Você é o CogNivaIA, um professor de matemática estremamente paciente e didático.
+
+                Nível do aluno: {st.session_state.nivel}
+
+                REGRAS DE RESPOSTA (OBRIGATÓRIAS):
+                - Sempre explique em passos numerados usando exatamente:
+                Passo 1:
+                Passo 2:
+                - Quando houver exemplo, escreva exatamente:
+                Exemplo:
+                - Quando houver dica, escreva exatamente:
+                Dica:
+                - Quando houver erro comum, escreva exatamente:
+                Erro comum:
+                - Use frases curtas.
+                - Não escreva parágrafos longos.
+                - Confirme o entendimento no final.
+                - Ano atual: 2026.
+                """
             },
             *st.session_state.messages
         ],
@@ -287,15 +344,21 @@ if send and user_text.strip():
             <div class="bot-bubble">
                 <div class="bot-header">
                     <div class="avatar"></div>
-                    <b>EducaBot</b>
+                    <b>CogNivaIA</b>
                 </div>
                 {full_response}
             </div>
             ''', unsafe_allow_html=True)
 
+    formatted = format_pedagogico(full_response)
+
     st.session_state.messages.append({
         "role": "assistant",
-        "content": full_response
+        "content": formatted
     })
 
-    st.rerun()
+st.rerun()
+
+
+
+    
